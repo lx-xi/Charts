@@ -23,6 +23,10 @@ import Cocoa
 @objc(ChartYAxisRenderer)
 open class YAxisRenderer: AxisRendererBase
 {
+    //by lx
+    open var fillAreaColor: NSUIColor = NSUIColor.clear
+    open var fillArea: (Float, Float)?
+    
     @objc public init(viewPortHandler: ViewPortHandler, yAxis: YAxis?, transformer: Transformer?)
     {
         super.init(viewPortHandler: viewPortHandler, transformer: transformer, axis: yAxis)
@@ -390,6 +394,48 @@ open class YAxisRenderer: AxisRendererBase
                 }
             }
         }
+        
+        context.restoreGState()
+    }
+    
+    //by lx
+    open func areaFill(context: CGContext) {
+        guard let transformer = self.transformer else { return }
+        // 如果颜色是clear，则不作填充处理
+        guard fillAreaColor != NSUIColor.clear else { return }
+        // 如果没配范围，则不作填充
+        guard let area = fillArea else { return }
+        
+        let lower = area.0
+        let upper = area.1
+        if upper == lower {
+            return
+        }
+        
+        context.saveGState()
+        
+        let trans = transformer.valueToPixelMatrix
+
+        var startPosition = CGPoint(x: 0.0, y: 0.0)
+        startPosition.x = 0.0
+        startPosition.y = CGFloat(upper)
+        startPosition = startPosition.applying(trans)
+        
+        var endPosition = CGPoint(x: 0.0, y: 0.0)
+        endPosition.y = CGFloat(lower)
+        endPosition = endPosition.applying(trans)
+        endPosition.x = viewPortHandler.contentRight
+        
+        let rect = CGRect(x: min(startPosition.x, endPosition.x),
+                          y: min(startPosition.y, endPosition.y),
+                          width: abs(startPosition.x - endPosition.x),
+                          height: abs(startPosition.y - endPosition.y));
+        
+        context.setFillColor(fillAreaColor.cgColor)
+//        context.setStrokeColor(UIColor.green.cgColor)
+        context.setLineWidth(0.0)
+        context.addRect(rect)
+        context.drawPath(using: .fillStroke)
         
         context.restoreGState()
     }

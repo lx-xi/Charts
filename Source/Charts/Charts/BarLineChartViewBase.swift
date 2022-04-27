@@ -273,6 +273,8 @@ open class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartD
         xAxisRenderer.renderAxisLabels(context: context)
         leftYAxisRenderer.renderAxisLabels(context: context)
         rightYAxisRenderer.renderAxisLabels(context: context)
+        //by lx -- 区域颜色
+        leftYAxisRenderer.areaFill(context: context)
 
         if clipValuesToContentEnabled
         {
